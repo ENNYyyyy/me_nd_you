@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 # Create your views here.
 from rest_framework.decorators import api_view
@@ -59,33 +60,25 @@ def get_questions(request, mode):
     try:
         session = CoupleSession.objects.get(secret_word=secret_word)
     except CoupleSession.DoesNotExist:
-        return Response({"error": "Session not found"}, status=404)
+        return Response([], status=200)  # Return empty array if session not found
 
     if mode == "mixed":
-        # get all admin questions
-        admin_qs = Question.objects.all().order_by("?")  # Get 10 random admin questions
-        # get all custom questions
-        custom_qs = CustomQuestion.objects.filter(couple=session).order_by(
-            "?"
-        )  # Get 10 random custom questions
+        admin_qs = Question.objects.all()
+        custom_qs = CustomQuestion.objects.filter(couple=session)
     else:
-        admin_qs = Question.objects.filter(mode=mode).order_by(
-            "?"
-        )  # Get  random admin questions for the specific mode
-        custom_qs = CustomQuestion.objects.filter(couple=session, mode=mode).order_by(
-            "?"
-        )  # Get  random custom questions for the specific mode
+        admin_qs = Question.objects.filter(mode=mode)
+        custom_qs = CustomQuestion.objects.filter(couple=session, mode=mode)
 
     all_questions = list(admin_qs) + list(custom_qs)
+    # Shuffle questions
     random.shuffle(all_questions)
 
-    # combine both types
     combined_data = []
     for q in all_questions:
-        if isinstance(q, Question):
-            combined_data.append({"text": q.text, "mode": q.mode, "is_custom": False})
-        else:
-            combined_data.append({"text": q.text, "mode": q.mode, "is_custom": True})
+        # Support both Question and CustomQuestion
+        combined_data.append(
+            {"text": q.text, "mode": q.mode, "is_custom": isinstance(q, CustomQuestion)}
+        )
 
     return Response(combined_data)
 
