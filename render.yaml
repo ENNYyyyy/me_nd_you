@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: me-nd-you
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+    startCommand: gunicorn me_nd_you.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        value: your-secret-key
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: your-render-app.onrender.com
+    build:
+      pythonVersion: 3.11
