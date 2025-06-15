@@ -6,7 +6,7 @@ services:
     startCommand: gunicorn me_nd_you.wsgi:application
     envVars:
       - key: SECRET_KEY
-        value: your-secret-key
+        value: Eniola12
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
