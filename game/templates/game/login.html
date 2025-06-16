@@ -269,14 +269,18 @@
         // Show iOS tip if on iOS and not installed
         if (isIos() && !isInStandaloneMode()) {
           document.getElementById("ios-pwa-tip").style.display = "block";
+          document.getElementById("install-tip").style.display = "none";
+          document.getElementById("installBtn").style.display = "none";
         }
       });
 
       window.addEventListener("beforeinstallprompt", (e) => {
+        if (isIos()) return; // Don't show install prompt/button on iOS
         e.preventDefault();
         deferredPrompt = e;
         document.getElementById("installBtn").classList.add("show");
         document.getElementById("install-tip").style.display = "block";
+        document.getElementById("ios-pwa-tip").style.display = "none";
       });
 
       document.getElementById("installBtn").addEventListener("click", () => {

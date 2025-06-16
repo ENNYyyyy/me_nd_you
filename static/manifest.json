@@ -1,9 +1,9 @@
 {
-  "name": "Me nD You",
+  "name": "Me & You",
   "short_name": "Me&You",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#0d0d0d",
   "theme_color": "#e75480",
   "icons": [
     {
