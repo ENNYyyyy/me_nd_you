@@ -31,16 +31,32 @@
     />
 
     <style>
+      html,
       body {
+        height: 100%;
         margin: 0;
         padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        min-width: 100vw;
         font-family: "Outfit", sans-serif;
         background: #0d0d0d;
         color: #fff;
-        height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
       }
 
       .login-container {
@@ -49,10 +65,11 @@
         backdrop-filter: blur(20px);
         border-radius: 20px;
         padding: 40px 30px;
-        width: 90%;
+        width: 100%;
         max-width: 400px;
         text-align: center;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 28px;
       }
 
       .login-container svg {
@@ -102,9 +119,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: 32px;
         width: 100%;
         max-width: 400px;
+        gap: 0;
       }
 
       #installBtn {
@@ -128,7 +145,8 @@
         display: block;
       }
 
-      #install-tip {
+      #install-tip,
+      #ios-pwa-tip {
         display: none;
         margin-top: 12px;
         background: #222;
@@ -140,19 +158,18 @@
         width: 100%;
       }
 
-      #ios-pwa-tip {
-        display: none;
-        margin-top: 12px;
-        background: #222;
-        color: #fff;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-size: 15px;
-        text-align: center;
-        width: 100%;
-      }
-
       @media (max-width: 500px) {
+        .main-content,
+        .login-container,
+        .pwa-actions {
+          max-width: 98vw;
+          width: 98vw;
+        }
+
+        .login-container {
+          padding: 28px 8px;
+        }
+
         h1 {
           font-size: 22px;
         }
@@ -160,46 +177,49 @@
     </style>
   </head>
   <body>
-    <div class="login-container">
-      <svg viewBox="0 0 24 24">
-        <path
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
-               2 6.5 3.5 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 
-               14.96 5 16.5 5 18.5 5 20 6.5 20 8.5c0 3.78-3.4 
-               6.86-8.55 11.54L12 21.35z"
-        />
-      </svg>
+    <div class="main-content">
+      <div class="login-container">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+                 2 6.5 3.5 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 
+                 14.96 5 16.5 5 18.5 5 20 6.5 20 8.5c0 3.78-3.4 
+                 6.86-8.55 11.54L12 21.35z"
+          />
+        </svg>
 
-      <h1>Me & You</h1>
+        <h1>Me & You</h1>
 
-      <form onsubmit="startSession(event)">
-        <input type="text" name="partner1" placeholder="Your Name" required />
-        <input
-          type="text"
-          name="partner2"
-          placeholder="Partner's Name"
-          required
-        />
-        <input type="text" name="secret" placeholder="Secret Word" required />
-        <button type="submit">Start</button>
-      </form>
-    </div>
-
-    <div class="pwa-actions">
-      <button id="installBtn" type="button">
-        <span style="font-size: 1.3em; vertical-align: middle">&#x1F4E6;</span>
-        Install App
-      </button>
-      <div id="install-tip">
-        Tip: On desktop, click "Install App" or use your browser's menu to
-        install.<br />
-        On Android, tap "Install App" when prompted.
+        <form onsubmit="startSession(event)">
+          <input type="text" name="partner1" placeholder="Your Name" required />
+          <input
+            type="text"
+            name="partner2"
+            placeholder="Partner's Name"
+            required
+          />
+          <input type="text" name="secret" placeholder="Secret Word" required />
+          <button type="submit">Start</button>
+        </form>
       </div>
-      <div id="ios-pwa-tip">
-        To install this app on your iPhone/iPad, tap
-        <span style="font-size: 1.2em">&#x1F5D2;</span> or
-        <span style="font-size: 1.2em">&#x2191;</span> and then "Add to Home
-        Screen".
+      <div class="pwa-actions">
+        <button id="installBtn" type="button">
+          <span style="font-size: 1.3em; vertical-align: middle"
+            >&#x1F4E6;</span
+          >
+          Install App
+        </button>
+        <div id="install-tip">
+          Tip: On desktop, click "Install App" or use your browser's menu to
+          install.<br />
+          On Android, tap "Install App" when prompted.
+        </div>
+        <div id="ios-pwa-tip">
+          To install this app on your iPhone/iPad, tap
+          <span style="font-size: 1.2em">&#x1F5D2;</span> or
+          <span style="font-size: 1.2em">&#x2191;</span> and then "Add to Home
+          Screen".
+        </div>
       </div>
     </div>
 
