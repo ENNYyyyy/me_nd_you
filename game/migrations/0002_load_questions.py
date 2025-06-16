@@ -7,7 +7,7 @@ def load_questions(apps, schema_editor):
     try:
         call_command("loaddata", "questions.json")
     except Exception:
-        pass
+        pass  # Ignore errors if already loaded or file missing
 
 
 class Migration(migrations.Migration):
