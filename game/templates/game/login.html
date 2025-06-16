@@ -304,7 +304,7 @@
             await navigator.serviceWorker.register(
               "/static/service-worker.js",
               {
-                scope: "/",
+                scope: "/static/",
               }
             );
           } catch (err) {
