@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.core.cache import cache
 
 # Create your views here.
 from rest_framework.decorators import api_view
@@ -57,13 +58,21 @@ import random
 def get_questions(request, mode):
     secret_word = request.GET.get("secret")
 
+    # Try fetching from cache first
+    cache_key = f"questions_{mode}_{secret_word}"
+    cached_questions = cache.get(cache_key)
+    if cached_questions:
+        return Response(cached_questions)
+
+    # If not in cache, get from database
     try:
         session = CoupleSession.objects.get(secret_word=secret_word)
     except CoupleSession.DoesNotExist:
         return Response([], status=200)  # Return empty array if session not found
 
     if mode == "mixed":
-        admin_qs = Question.objects.all()
+        admin_qs = Question.objects.all().order_by("?")
+        # Custom questions for the specific couple session
         custom_qs = CustomQuestion.objects.filter(couple=session)
     else:
         admin_qs = Question.objects.filter(mode=mode)
@@ -80,6 +89,8 @@ def get_questions(request, mode):
             {"text": q.text, "mode": q.mode, "is_custom": isinstance(q, CustomQuestion)}
         )
 
+    # Cache the results for 1 hour
+    cache.set(cache_key, combined_data, timeout=3600)
     return Response(combined_data)
 
 

@@ -3,7 +3,6 @@
   <head>
     {% load static %}
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Let's Play – 3D Flip Card Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -307,12 +306,7 @@
 
       async function loadQuestions() {
         try {
-          const res = await fetch(`/api/questions/${mode}?secret=${secret}`, {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json; charset=utf-8",
-            },
-          });
+          const res = await fetch(`/api/questions/${mode}?secret=${secret}`);
           questions = await res.json();
 
           loadSession();
