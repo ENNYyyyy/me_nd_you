@@ -70,11 +70,12 @@ def login_or_register(request):
     return Response(
         {
             "success": True,
-            "redirect": f"/modes/?secret={secret_word}",  # Use secret_word, not session.id
+            "redirect": f"/modes/?secret={secret_word}",
             "session": {
                 "id": str(session.id),
                 "secret": secret_word,
                 "names": [session.partner1_name, session.partner2_name],
+                "timestamp": timezone.now().timestamp(),
             },
         }
     )

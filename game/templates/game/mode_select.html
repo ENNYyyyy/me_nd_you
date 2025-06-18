@@ -140,11 +140,9 @@
     <script>
       const params = new URLSearchParams(window.location.search);
       const secret = params.get("secret");
-      const session = JSON.parse(localStorage.getItem("session") || "null");
 
-      // Verify session and secret match
-      if (!session || !secret || session.secret !== secret) {
-        localStorage.removeItem("session");
+      // Only check if secret exists
+      if (!secret) {
         window.location.href = "/";
       }
 
@@ -173,4 +171,6 @@
       }
     </script>
   </body>
+</html>
+</html>
 </html>

@@ -328,6 +328,11 @@
             const data = JSON.parse(saved);
             seenTexts = Array.isArray(data.seen) ? data.seen : [];
             seed = urlSeed ? parseInt(urlSeed) : data.seed || null;
+          } else {
+            // Initialize new session
+            seenTexts = [];
+            seed = urlSeed ? parseInt(urlSeed) : Date.now() % 1000000000;
+            saveSession();
           }
         } catch (err) {
           console.error("Session load error:", err);
@@ -429,7 +434,7 @@
         loadQuestions();
         // checkSession();     // Disabled for free plan
         showGuide();
-        
+
         // setInterval(checkSession, 300000);  // Disabled for free plan
       });
 
@@ -699,15 +704,11 @@
       document.addEventListener("DOMContentLoaded", () => {
         connectWebSocket();
         loadQuestions();
-        checkSession(); // Add session check
-        showGuide(); // Add guide
+        // checkSession();  // Remove this
+        showGuide();
 
-        // Add periodic session check every 5 minutes
-        setInterval(checkSession, 300000);
+        // setInterval(checkSession, 300000);  // Remove this
       });
-    </script>
-  </body>
-</html>
     </script>
   </body>
 </html>

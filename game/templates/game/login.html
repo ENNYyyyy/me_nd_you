@@ -367,12 +367,12 @@
           const data = await res.json();
 
           if (data.success) {
-            // Save session info for /modes/ and /play/ pages
+            // Store session with mode-specific key
+            localStorage.removeItem('session'); // Remove old session format
             localStorage.setItem(
-              `session-${data.session.secret}-${data.session.names.join("-")}`,
+              `session-${data.session.secret}`,
               JSON.stringify(data.session)
             );
-            // Redirect to modes
             window.location.href = data.redirect;
           } else {
             // Show specific errors
@@ -461,4 +461,5 @@
       }
     </script>
   </body>
+</html>
 </html>
