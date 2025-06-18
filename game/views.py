@@ -27,55 +27,45 @@ def login_or_register(request):
     partner2_name = request.data.get("partner2_name")
     secret_word = request.data.get("secret_word")
 
-    # Validation
     if not all([partner1_name, partner2_name, secret_word]):
         return Response(
-            {"success": False, "detail": "All fields are required"}, status=400
-        )
-
-    if partner1_name.lower() == partner2_name.lower():
-        return Response(
-            {"success": False, "detail": "Names must be different"}, status=400
-        )
-
-    if len(secret_word) < 4:
-        return Response(
-            {"success": False, "detail": "Secret word must be at least 4 characters"},
+            {
+                "success": False,
+                "detail": "Please fill in all fields before continuing.",
+            },
             status=400,
         )
 
+    # Sort names for matching
+    names = sorted([partner1_name.strip().lower(), partner2_name.strip().lower()])
+
     try:
-        # Find existing session
         session = CoupleSession.objects.get(secret_word=secret_word)
-
-        # Check if session is expired (optional)
-        if timezone.now() - session.last_active > timedelta(days=30):
-            session.delete()
-            raise CoupleSession.DoesNotExist
-
-        # Verify names match (in any order)
-        stored_names = {session.partner1_name.lower(), session.partner2_name.lower()}
-        input_names = {partner1_name.lower(), partner2_name.lower()}
-
-        if stored_names != input_names:
+        stored_names = sorted(
+            [
+                session.partner1_name.strip().lower(),
+                session.partner2_name.strip().lower(),
+            ]
+        )
+        if names != stored_names:
             return Response(
-                {"success": False, "detail": "Names do not match existing session"},
+                {
+                    "success": False,
+                    "detail": (
+                        "This secret word is already in use by another couple. "
+                        "If this is your session, please enter the same names you used before. "
+                        "Otherwise, choose a different secret word."
+                    ),
+                },
                 status=400,
             )
-
-        # Update last active
-        session.save()
-
     except CoupleSession.DoesNotExist:
-        try:
-            # Create new session
-            session = CoupleSession.objects.create(
-                partner1_name=partner1_name,
-                partner2_name=partner2_name,
-                secret_word=secret_word,
-            )
-        except ValidationError as e:
-            return Response({"success": False, "detail": str(e)}, status=400)
+        # Create new session
+        session = CoupleSession.objects.create(
+            partner1_name=partner1_name,
+            partner2_name=partner2_name,
+            secret_word=secret_word,
+        )
 
     return Response(
         {

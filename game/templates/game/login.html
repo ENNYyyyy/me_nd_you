@@ -302,7 +302,7 @@
             <input
               type="text"
               name="secret_word"
-              placeholder="Create a Secret Word"
+              placeholder="Secret Word"
               required
               minlength="4"
             />
@@ -367,8 +367,11 @@
           const data = await res.json();
 
           if (data.success) {
-            // Store session data
-            localStorage.setItem("session", JSON.stringify(data.session));
+            // Save session info for /modes/ and /play/ pages
+            localStorage.setItem(
+              `session-${data.session.secret}-${data.session.names.join("-")}`,
+              JSON.stringify(data.session)
+            );
             // Redirect to modes
             window.location.href = data.redirect;
           } else {
