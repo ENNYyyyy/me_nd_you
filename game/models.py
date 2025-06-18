@@ -8,8 +8,8 @@ from django.utils import timezone
 # Each couple shares a secret word (like a room code)
 class CoupleSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    partner1_name = models.CharField(max_length=100)
-    partner2_name = models.CharField(max_length=100)
+    partner1_name = models.CharField(max_length=100)  # Changed from person1_name
+    partner2_name = models.CharField(max_length=100)  # Changed from person2_name
     secret_word = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now=True)

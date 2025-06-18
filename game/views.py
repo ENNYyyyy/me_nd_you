@@ -54,7 +54,7 @@ def login_or_register(request):
             raise CoupleSession.DoesNotExist
 
         # Verify names match (in any order)
-        stored_names = {session.person1_name.lower(), session.person2_name.lower()}
+        stored_names = {session.partner1_name.lower(), session.partner2_name.lower()}
         input_names = {partner1_name.lower(), partner2_name.lower()}
 
         if stored_names != input_names:
@@ -70,8 +70,8 @@ def login_or_register(request):
         try:
             # Create new session
             session = CoupleSession.objects.create(
-                person1_name=partner1_name,
-                person2_name=partner2_name,
+                partner1_name=partner1_name,
+                partner2_name=partner2_name,
                 secret_word=secret_word,
             )
         except ValidationError as e:
@@ -84,7 +84,7 @@ def login_or_register(request):
             "session": {
                 "id": str(session.id),
                 "secret": secret_word,
-                "names": [session.person1_name, session.person2_name],
+                "names": [session.partner1_name, session.partner2_name],
             },
         }
     )
