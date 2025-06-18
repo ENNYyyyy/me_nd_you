@@ -70,7 +70,7 @@ def login_or_register(request):
     return Response(
         {
             "success": True,
-            "redirect": f"/modes/?secret={session.id}",
+            "redirect": f"/modes/?secret={secret_word}",  # Use secret_word, not session.id
             "session": {
                 "id": str(session.id),
                 "secret": secret_word,
