@@ -163,6 +163,32 @@
         right: 15px;
         cursor: pointer;
       }
+      /* Add guide modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: var(--glass);
+        border: 1px solid var(--border);
+        padding: 25px;
+        border-radius: 16px;
+        max-width: 90%;
+        width: 400px;
+        text-align: center;
+      }
+      .modal-content h3 {
+        color: var(--accent);
+        margin-bottom: 20px;
+      }
+      .modal-content p {
+        margin: 10px 0;
+      }
     </style>
   </head>
   <body>
@@ -204,6 +230,17 @@
           <button type="submit">Add</button>
         </div>
       </form>
+    </div>
+
+    <!-- Add guide modal -->
+    <div id="guide-modal" class="modal">
+      <div class="modal-content">
+        <h3>How to Play</h3>
+        <p>1. Take turns reading questions</p>
+        <p>2. Both partners must answer honestly</p>
+        <p>3. Add your own questions anytime</p>
+        <button onclick="closeGuide()">Got it!</button>
+      </div>
     </div>
 
     <script>
@@ -390,6 +427,11 @@
       document.addEventListener("DOMContentLoaded", () => {
         connectWebSocket();
         loadQuestions();
+        checkSession(); // Add session check
+        showGuide(); // Add guide
+
+        // Add periodic session check every 5 minutes
+        setInterval(checkSession, 300000);
       });
 
       function openModal() {
@@ -622,6 +664,50 @@
           }
         });
       }
+
+      // Add session expiry check
+      async function checkSession() {
+        const session = localStorage.getItem(`session-${secret}-${mode}`);
+        if (!session) {
+          window.location.href = "/";
+          return;
+        }
+
+        try {
+          const res = await fetch(`/api/check-session/?secret=${secret}`);
+          const data = await res.json();
+          if (!data.valid) {
+            alert("Session expired. Please login again.");
+            window.location.href = "/";
+          }
+        } catch (err) {
+          console.error("Session check failed:", err);
+        }
+      }
+
+      // Show guide on first visit
+      function showGuide() {
+        const hasSeenGuide = localStorage.getItem("hasSeenGuide");
+        if (!hasSeenGuide) {
+          document.getElementById("guide-modal").style.display = "flex";
+          localStorage.setItem("hasSeenGuide", "true");
+        }
+      }
+
+      function closeGuide() {
+        document.getElementById("guide-modal").style.display = "none";
+      }
+
+      // Add to initialization
+      document.addEventListener("DOMContentLoaded", () => {
+        connectWebSocket();
+        loadQuestions();
+        checkSession(); // Add session check
+        showGuide(); // Add guide
+
+        // Add periodic session check every 5 minutes
+        setInterval(checkSession, 300000);
+      });
     </script>
   </body>
 </html>

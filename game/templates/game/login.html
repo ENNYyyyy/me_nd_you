@@ -217,6 +217,44 @@
           max-width: 420px;
         }
       }
+
+      .form-group {
+        margin-bottom: 16px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .form-group small {
+        color: #aaa;
+        display: block;
+        margin-top: 4px;
+        font-size: 14px;
+      }
+
+      .error-text {
+        color: var(--accent);
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+      }
+
+      .help-text {
+        color: #aaa;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+      }
+
+      #loadingIndicator {
+        text-align: center;
+        margin-top: 10px;
+        color: #aaa;
+      }
+
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
     </style>
   </head>
   <body>
@@ -234,15 +272,48 @@
         <h1>Me & You</h1>
 
         <form onsubmit="startSession(event)">
-          <input type="text" name="partner1" placeholder="Your Name" required />
-          <input
-            type="text"
-            name="partner2"
-            placeholder="Partner's Name"
-            required
-          />
-          <input type="text" name="secret" placeholder="Secret Word" required />
-          <button type="submit">Start</button>
+          <div class="form-group">
+            <input
+              type="text"
+              name="partner1_name"
+              placeholder="Your Name"
+              required
+              minlength="2"
+              pattern="[A-Za-z ]+"
+              title="Letters and spaces only"
+            />
+            <small class="error-text" id="name1Error"></small>
+          </div>
+
+          <div class="form-group">
+            <input
+              type="text"
+              name="partner2_name"
+              placeholder="Partner's Name"
+              required
+              minlength="2"
+              pattern="[A-Za-z ]+"
+              title="Letters and spaces only"
+            />
+            <small class="error-text" id="name2Error"></small>
+          </div>
+
+          <div class="form-group">
+            <input
+              type="text"
+              name="secret_word"
+              placeholder="Create a Secret Word"
+              required
+              minlength="4"
+            />
+            <small class="help-text"
+              >Share this word with your partner to play together</small
+            >
+            <small class="error-text" id="secretError"></small>
+          </div>
+
+          <button type="submit" id="submitBtn">Start Game</button>
+          <div id="loadingIndicator" style="display: none">Connecting...</div>
         </form>
       </div>
       <div class="pwa-actions">
@@ -269,6 +340,17 @@
     <script>
       async function startSession(e) {
         e.preventDefault();
+        const submitBtn = document.getElementById("submitBtn");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+
+        // Clear previous errors
+        document
+          .querySelectorAll(".error-text")
+          .forEach((el) => (el.textContent = ""));
+
+        submitBtn.disabled = true;
+        loadingIndicator.style.display = "block";
+
         const formData = new FormData(e.target);
 
         try {
@@ -276,9 +358,9 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              partner1_name: formData.get("partner1"),
-              partner2_name: formData.get("partner2"),
-              secret_word: formData.get("secret"),
+              partner1_name: formData.get("partner1_name"),
+              partner2_name: formData.get("partner2_name"),
+              secret_word: formData.get("secret_word"),
             }),
           });
 
@@ -290,11 +372,30 @@
             // Redirect to modes
             window.location.href = data.redirect;
           } else {
-            alert(data.detail || "Login failed");
+            // Show specific errors
+            if (data.errors?.partner1) {
+              document.getElementById("name1Error").textContent =
+                data.errors.partner1;
+            }
+            if (data.errors?.partner2) {
+              document.getElementById("name2Error").textContent =
+                data.errors.partner2;
+            }
+            if (data.errors?.secret) {
+              document.getElementById("secretError").textContent =
+                data.errors.secret;
+            }
+            // General error
+            if (data.detail) {
+              alert(data.detail);
+            }
           }
         } catch (err) {
           console.error("Login error:", err);
-          alert("Login failed");
+          alert("Connection error. Please try again.");
+        } finally {
+          submitBtn.disabled = false;
+          loadingIndicator.style.display = "none";
         }
       }
 

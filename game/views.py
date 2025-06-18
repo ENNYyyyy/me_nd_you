@@ -2,6 +2,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 from rest_framework.decorators import api_view
@@ -20,34 +23,71 @@ from .serializers import (
 @csrf_exempt
 @api_view(["POST"])
 def login_or_register(request):
-    data = request.data
-    partner1 = data.get("partner1_name")
-    partner2 = data.get("partner2_name")
-    secret = data.get("secret_word")
+    partner1_name = request.data.get("partner1_name")
+    partner2_name = request.data.get("partner2_name")
+    secret_word = request.data.get("secret_word")
 
-    if not (partner1 and partner2 and secret):
-        return Response({"detail": "All fields are required."}, status=400)
+    # Validation
+    if not all([partner1_name, partner2_name, secret_word]):
+        return Response(
+            {"success": False, "detail": "All fields are required"}, status=400
+        )
+
+    if partner1_name.lower() == partner2_name.lower():
+        return Response(
+            {"success": False, "detail": "Names must be different"}, status=400
+        )
+
+    if len(secret_word) < 4:
+        return Response(
+            {"success": False, "detail": "Secret word must be at least 4 characters"},
+            status=400,
+        )
 
     try:
-        session, created = CoupleSession.objects.get_or_create(secret_word=secret)
-        session.partner1_name = partner1
-        session.partner2_name = partner2
+        # Find existing session
+        session = CoupleSession.objects.get(secret_word=secret_word)
+
+        # Check if session is expired (optional)
+        if timezone.now() - session.last_active > timedelta(days=30):
+            session.delete()
+            raise CoupleSession.DoesNotExist
+
+        # Verify names match (in any order)
+        stored_names = {session.person1_name.lower(), session.person2_name.lower()}
+        input_names = {partner1_name.lower(), partner2_name.lower()}
+
+        if stored_names != input_names:
+            return Response(
+                {"success": False, "detail": "Names do not match existing session"},
+                status=400,
+            )
+
+        # Update last active
         session.save()
 
-        # Return session data
-        return Response(
-            {
-                "success": True,
-                "session": {
-                    "secret": secret,
-                    "partner1": partner1,
-                    "partner2": partner2,
-                },
-                "redirect": "/modes/?secret=" + secret,
-            }
-        )
-    except Exception as e:
-        return Response({"detail": str(e)}, status=500)
+    except CoupleSession.DoesNotExist:
+        try:
+            # Create new session
+            session = CoupleSession.objects.create(
+                person1_name=partner1_name,
+                person2_name=partner2_name,
+                secret_word=secret_word,
+            )
+        except ValidationError as e:
+            return Response({"success": False, "detail": str(e)}, status=400)
+
+    return Response(
+        {
+            "success": True,
+            "redirect": f"/modes/?secret={session.id}",
+            "session": {
+                "id": str(session.id),
+                "secret": secret_word,
+                "names": [session.person1_name, session.person2_name],
+            },
+        }
+    )
 
 
 from django.db.models import Q
@@ -118,6 +158,23 @@ def get_custom_questions(request, secret_word, mode):
         return Response(serializer.data)
     except CoupleSession.DoesNotExist:
         return Response({"error": "Session not found"}, status=404)
+
+
+@api_view(["GET"])
+def check_session(request):
+    secret = request.GET.get("secret")
+    if not secret:
+        return Response({"valid": False})
+
+    try:
+        session = CoupleSession.objects.get(secret_word=secret)
+        if timezone.now() - session.last_active > timedelta(days=30):
+            session.delete()
+            return Response({"valid": False})
+        session.save()  # Updates last_active
+        return Response({"valid": True})
+    except CoupleSession.DoesNotExist:
+        return Response({"valid": False})
 
 
 def login_page(request):
