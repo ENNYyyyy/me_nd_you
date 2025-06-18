@@ -425,13 +425,12 @@
 
       // Initialize when document is ready
       document.addEventListener("DOMContentLoaded", () => {
-        connectWebSocket();
+        // connectWebSocket();  // Disabled for free plan
         loadQuestions();
-        checkSession(); // Add session check
-        showGuide(); // Add guide
-
-        // Add periodic session check every 5 minutes
-        setInterval(checkSession, 300000);
+        // checkSession();     // Disabled for free plan
+        showGuide();
+        
+        // setInterval(checkSession, 300000);  // Disabled for free plan
       });
 
       function openModal() {
@@ -460,13 +459,11 @@
             remaining.push(q);
             updateRemaining();
             closeModal();
-            safeSend(
-              JSON.stringify({
-                type: "new_question",
-                userId: myUserId,
-                question: q,
-              })
-            );
+            // safeSend(JSON.stringify({  // Disabled WebSocket send
+            //     type: "new_question",
+            //     userId: myUserId,
+            //     question: q,
+            // }));
             alert("✅ Added!");
           } else {
             alert("❌ Failed to add.");
@@ -708,6 +705,9 @@
         // Add periodic session check every 5 minutes
         setInterval(checkSession, 300000);
       });
+    </script>
+  </body>
+</html>
     </script>
   </body>
 </html>
